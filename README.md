@@ -1,73 +1,99 @@
-# React + TypeScript + Vite
+# admin-app
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Panel de administración de un sistema de pedidos de comida. Permite gestionar productos, ingredientes, categorías y pedidos con control de acceso por roles.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Vite 8** + **React 19** + **TypeScript 6**
+- **React Router DOM v7** — enrutamiento del cliente
+- **TanStack Query v5** — fetching y caché de datos
+- **TanStack Table v8** — tablas con paginación y filtros
+- **TanStack Form v1** — formularios tipados
+- **Axios v1** — cliente HTTP
+- **Zustand v5** — estado global
+- **Tailwind CSS v4** — estilos utilitarios
 
-## React Compiler
+## Instalación
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Copiar las variables de entorno:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
+
+Editar `.env` con la URL de la API:
+
+```
+VITE_API_URL=http://localhost:3000/api
+```
+
+## Levantar el proyecto
+
+```bash
+# desarrollo
+npm run dev
+
+# build de producción
+npm run build
+
+# preview del build
+npm run preview
+```
+
+## Estructura de carpetas
+
+```
+src/
+├── features/         # módulos por dominio
+│   ├── products/     # productos del menú
+│   ├── ingredients/  # ingredientes
+│   ├── categories/   # categorías de productos
+│   ├── orders/       # pedidos
+│   └── auth/         # autenticación
+├── shared/           # componentes reutilizables (Layout, Sidebar, Navbar)
+├── store/            # stores de Zustand
+├── lib/              # instancia de axios
+└── router/           # configuración de rutas
+```
+
+Cada feature sigue la misma estructura interna:
+
+```
+feature/
+├── types.ts          # interfaces y tipos
+├── services/         # llamadas a la API
+├── hooks/            # hooks de TanStack Query
+├── components/       # componentes del módulo
+└── page/             # páginas / vistas
+```
+
+## Variables de entorno
+
+| Variable        | Descripción              | Ejemplo                       |
+| --------------- | ------------------------ | ----------------------------- |
+| `VITE_API_URL`  | URL base de la API REST  | `http://localhost:3000/api`   |
+
+## Roles del sistema
+
+| Rol        | Permisos                                      |
+| ---------- | --------------------------------------------- |
+| `admin`    | CRUD completo sobre todos los recursos        |
+| `empleado` | Solo lectura                                  |
+| `cajero`   | Gestión de estados de pedidos                 |
+
+## PRUEBAS DE LOGIN 
+
+localStorage.setItem('auth-storage', JSON.stringify({
+    state: {
+      user: { id: 1, nombre: "Admin", email: "admin@test.com" },
+      token: "test-token",
+      rol: "admin"
+    },
+    version: 0
+  }))
+
+
