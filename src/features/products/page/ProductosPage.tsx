@@ -1,12 +1,6 @@
 import { useState } from 'react'
 import useAuthStore from '@/store/useAuthStore'
-import {
-  useProducts,
-  useCreateProduct,
-  useUpdateProduct,
-  useDeleteProduct,
-  useToggleDisponible,
-} from '@/features/products/hooks/useProducts'
+import { useProducts } from '@/features/products/hooks/useProducts'
 import { useCategories } from '@/features/categorias/hooks/useCategories'
 import { useIngredients } from '@/features/ingredients/hooks/useIngredients'
 import { useUnidadesMedida } from '@/features/unidades-medida/hooks/useUnidadesMedida'
@@ -14,17 +8,21 @@ import type { Product, ProductFormData } from '@/features/products/types'
 import ProductsTable from '@/features/products/components/ProductsTable'
 import ProductFormModal from '@/features/products/components/ProductFormModal'
 import DeleteConfirmModal from '@/features/products/components/DeleteConfirmModal'
+
 export default function ProductosPage() {
   const rol = useAuthStore((s) => s.rol)
   const isAdmin = rol === 'admin'
-  const { data: products, isLoading, isError, error, refetch } = useProducts()
+  const {
+    data: products, isLoading, isError, error, refetch,
+    create: createMutation,
+    update: updateMutation,
+    delete: deleteMutation,
+    toggleDisponible: toggleMutation,
+    isCreating, isUpdating, isDeleting, isToggling,
+  } = useProducts()
   const { data: categories } = useCategories()
   const { data: ingredients } = useIngredients()
   const { data: unidades } = useUnidadesMedida()
-  const createMutation = useCreateProduct()
-  const updateMutation = useUpdateProduct()
-  const deleteMutation = useDeleteProduct()
-  const toggleMutation = useToggleDisponible()
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null)
@@ -176,7 +174,7 @@ export default function ProductosPage() {
           unidades={unidades ?? []}
           onSubmit={handleFormSubmit}
           onClose={() => setShowForm(false)}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
+          isSubmitting={isCreating || isUpdating}
         />
       )}
       {/* Delete Modal */}
@@ -185,7 +183,7 @@ export default function ProductosPage() {
           product={deletingProduct}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeletingProduct(null)}
-          isDeleting={deleteMutation.isPending}
+          isDeleting={isDeleting}
         />
       )}
     </>

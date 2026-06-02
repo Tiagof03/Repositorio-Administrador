@@ -7,41 +7,37 @@ import {
   updateCategory,
   deleteCategory,
 } from '@/features/categorias/services/categories.service'
-export const useCategories = () =>
-  useQuery({
-    queryKey: ['categories'],
-    queryFn: getCategories,
-  })
-export const useCategory = (id: number) =>
-  useQuery({
-    queryKey: ['categories', id],
-    queryFn: () => getCategoryById(id),
-  })
-export const useCreateCategory = () => {
+
+export function useCategories() {
   const queryClient = useQueryClient()
-  return useMutation({
+  const queryKey = ['categories']
+
+  const getAll = useQuery({queryKey, queryFn: getCategories})
+
+  const getById = (id: number) => useQuery({queryKey: [...queryKey, id], queryFn: () => getCategoryById(id), enabled: id > 0})
+
+  const create = useMutation({
     mutationFn: (payload: CategoryFormData) => createCategory(payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['categories'] })
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
   })
-}
-export const useUpdateCategory = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
+  const update = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: Partial<CategoryFormData> }) =>
       updateCategory(id, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['categories'] })
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
   })
-}
-export const useDeleteCategory = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
+  const remove = useMutation({
     mutationFn: (id: number) => deleteCategory(id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['categories'] })
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
   })
+
+  return {
+    ...getAll,
+    getById,
+    create,
+    update,
+    delete: remove,
+    isCreating: create.isPending,
+    isUpdating: update.isPending,
+    isDeleting: remove.isPending
+  }
 }

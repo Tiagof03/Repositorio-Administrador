@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import useAuthStore from '@/store/useAuthStore'
-import {
-  useIngredients,
-  useCreateIngredient,
-  useUpdateIngredient,
-  useDeleteIngredient,
-} from '@/features/ingredients/hooks/useIngredients'
+import { useIngredients } from '@/features/ingredients/hooks/useIngredients'
 import type { Ingredient, IngredientFormData } from '@/features/ingredients/types'
 import IngredientsTable from '@/features/ingredients/components/IngredientsTable'
 import IngredientFormModal from '@/features/ingredients/components/IngredientFormModal'
@@ -82,11 +77,13 @@ export default function IngredientesPage() {
   const rol = useAuthStore((s) => s.rol)
   const isAdmin = rol === 'admin'
 
-  const { data: ingredients, isLoading, isError, error, refetch } = useIngredients()
-
-  const createMutation = useCreateIngredient()
-  const updateMutation = useUpdateIngredient()
-  const deleteMutation = useDeleteIngredient()
+  const {
+    data: ingredients, isLoading, isError, error, refetch,
+    create: createMutation,
+    update: updateMutation,
+    delete: deleteMutation,
+    isCreating, isUpdating, isDeleting
+  } = useIngredients()
 
   const [showForm, setShowForm] = useState(false)
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null)
@@ -194,7 +191,7 @@ export default function IngredientesPage() {
           ingredient={editingIngredient}
           onSubmit={handleFormSubmit}
           onClose={() => setShowForm(false)}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
+          isSubmitting={isCreating || isUpdating}
         />
       )}
 
@@ -204,7 +201,7 @@ export default function IngredientesPage() {
           ingredient={deletingIngredient}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeletingIngredient(null)}
-          isDeleting={deleteMutation.isPending}
+          isDeleting={isDeleting}
         />
       )}
     </>

@@ -30,7 +30,7 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="text-headline-md font-extrabold text-primary uppercase tracking-tighter">
-              Food Store
+              FoodStore Admin
             </h1>
             <p className="text-label-sm text-on-surface-variant/70 uppercase tracking-widest">
               Admin Portal

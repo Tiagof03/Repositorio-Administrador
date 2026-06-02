@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import useAuthStore from '@/store/useAuthStore'
-import {
-  useCategories,
-  useCreateCategory,
-  useUpdateCategory,
-  useDeleteCategory,
-} from '@/features/categorias/hooks/useCategories'
+import { useCategories } from '@/features/categorias/hooks/useCategories'
 import type { Category, CategoryFormData } from '@/features/categorias/types'
 import CategoriesTable from '@/features/categorias/components/CategoriesTable'
 import CategoryFormModal from '@/features/categorias/components/CategoryFormModal'
@@ -15,11 +10,13 @@ export default function CategoriasPage() {
   const rol = useAuthStore((s) => s.rol)
   const isAdmin = rol === 'admin'
 
-  const { data: categories, isLoading, isError, error, refetch } = useCategories()
-
-  const createMutation = useCreateCategory()
-  const updateMutation = useUpdateCategory()
-  const deleteMutation = useDeleteCategory()
+  const { 
+    data: categories, isLoading, isError, error, refetch,
+    create: createMutation,
+    update: updateMutation,
+    delete: deleteMutation,
+    isCreating, isUpdating, isDeleting
+  } = useCategories()
 
   const [showForm, setShowForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
@@ -139,7 +136,7 @@ export default function CategoriasPage() {
           defaultParentId={defaultParentId}
           onSubmit={handleFormSubmit}
           onClose={() => setShowForm(false)}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
+          isSubmitting={isCreating || isUpdating}
         />
       )}
 
@@ -149,7 +146,7 @@ export default function CategoriasPage() {
           category={deletingCategory}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeletingCategory(null)}
-          isDeleting={deleteMutation.isPending}
+          isDeleting={isDeleting}
         />
       )}
     </>

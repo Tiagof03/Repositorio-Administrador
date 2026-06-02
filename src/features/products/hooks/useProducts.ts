@@ -6,53 +6,47 @@ import {
   updateProduct,
   deleteProduct,
   toggleProductDisponible,
-} from '@/features/products/types'
+} from '@/features/products/services/products.service'
 import type { Product, ProductFormData } from '@/features/products/types'
-export const useProducts = () =>
-  useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts,
-  })
-export const useProduct = (id: number) =>
-  useQuery({
-    queryKey: ['products', id],
-    queryFn: () => getProductById(id),
-  })
-export const useCreateProduct = () => {
+
+export function useProducts() {
   const queryClient = useQueryClient()
-  return useMutation({
+  const queryKey = ['products']
+
+  const getAll = useQuery({queryKey, queryFn: getProducts})
+
+  const getById = (id: number) => useQuery({queryKey: [...queryKey, id], queryFn: () => getProductById(id), enabled: id > 0})
+
+  const create = useMutation({
     mutationFn: (payload: ProductFormData) => createProduct(payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['products'] })
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
   })
-}
-export const useUpdateProduct = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
+  const update = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: Partial<ProductFormData> }) =>
       updateProduct(id, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['products'] })
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
   })
-}
-export const useDeleteProduct = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
+  const remove = useMutation({
     mutationFn: (id: number) => deleteProduct(id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['products'] })
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
   })
-}
-export const useToggleDisponible = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
+
+  const toggleDisponible = useMutation({
     mutationFn: ({ id, disponible }: { id: number; disponible: boolean }) =>
       toggleProductDisponible(id, disponible),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['products'] })
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
   })
+
+  return {
+    ...getAll,
+    getById,
+    create,
+    update,
+    delete: remove,
+    toggleDisponible,
+    isCreating: create.isPending,
+    isUpdating: update.isPending,
+    isDeleting: remove.isPending,
+    isTogglingDisponible: toggleDisponible.isPending
+  }
 }

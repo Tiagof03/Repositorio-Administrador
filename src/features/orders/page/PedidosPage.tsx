@@ -1,13 +1,12 @@
 import { useState, useMemo } from 'react'
-import { useOrders, useUpdateOrderStatus } from '@/features/orders/hooks/useOrders'
+import { useOrders } from '@/features/orders/hooks/useOrders'
 import { useClientNames } from '@/features/orders/hooks/useClientNames'
 import { hydrateClientNames } from '@/features/orders/services/admin.service'
 import OrdersKanban from '@/features/orders/components/OrdersKanban'
 import OrderDetailPanel from '@/features/orders/components/OrderDetailPanel'
 import type { Order } from '@/features/orders/types'
 export default function PedidosPage() {
-  const { data: orders, isLoading, error } = useOrders()
-  const { mutate: updateStatus } = useUpdateOrderStatus()
+  const { data: orders, isLoading, error, updateStatus } = useOrders()
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const namesMap = useClientNames(orders)
   const hydratedOrders = useMemo(
@@ -19,7 +18,7 @@ export default function PedidosPage() {
     estadoHacia: string,
     motivo?: string | null,
   ) => {
-    updateStatus({ id: orderId, estadoHacia, motivo })
+    updateStatus.mutate({ id: orderId, estadoHacia, motivo })
   }
   if (isLoading) {
     return (

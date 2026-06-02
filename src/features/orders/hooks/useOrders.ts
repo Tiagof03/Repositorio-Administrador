@@ -4,31 +4,32 @@ import {
   getOrderById,
   updateOrderStatus,
 } from '@/features/orders/services/orders.service'
-export const useOrders = () =>
-  useQuery({
-    queryKey: ['orders'],
-    queryFn: getOrders,
-  })
-export const useOrder = (id: number) =>
-  useQuery({
-    queryKey: ['orders', id],
-    queryFn: () => getOrderById(id),
-    enabled: id > 0,
-  })
-export const useUpdateOrderStatus = () => {
+
+export function useOrders() {
   const queryClient = useQueryClient()
-  return useMutation({
+  const queryKey = ['orders']
+
+  const getAll = useQuery({queryKey, queryFn: getOrders})
+
+  const getById = (id: number) => useQuery({queryKey: [...queryKey, id], queryFn: () => getOrderById(id), enabled: id > 0})
+
+  const updateStatus = useMutation({
     mutationFn: ({
-      id,
-      estadoHacia,
-      motivo,
+      id, estadoHacia, motivo
     }: {
       id: number
       estadoHacia: string
       motivo?: string | null
     }) => updateOrderStatus(id, estadoHacia, motivo),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['orders'] })
+      void queryClient.invalidateQueries({ queryKey })
     },
   })
+
+  return {
+    ...getAll,
+    getById,
+    updateStatus,
+    isUpdatingStatus: updateStatus.isPending
+  }
 }
