@@ -23,13 +23,15 @@ export interface RegisterRequest {
   celular?: string
   password: string
 }
-// Lo que devuelve nuestro service unificado (token + me)
-export type Role = 'admin' | 'empleado' | 'cajero'
+
+export type Role = 'admin' | 'empleado' | 'cajero' | 'stock'
 export interface LoginResponse {
   user: {
     id: number
     nombre: string
+    apellido: string
     email: string
+    celular: string | null
   }
   token: string
   rol: Role

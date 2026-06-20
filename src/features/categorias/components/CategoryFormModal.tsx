@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { Category, CategoryFormData } from '@/features/categorias/types'
+import ImageUploader from '@/features/products/components/ImageUploader'
 interface Props {
   category: Category | null
   parentCategories: Category[]
@@ -50,13 +51,13 @@ export default function CategoryFormModal({
       ? 'Crear Subcategoría'
       : 'Nueva Categoría'
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex justify-end">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      {/* Modal */}
-      <div className="relative bg-surface-container border border-outline-variant/20 w-full max-w-lg mx-4 flex flex-col max-h-[90vh] overflow-y-auto">
+      {/* Panel */}
+      <div className="relative w-full max-w-lg bg-surface-container border-l border-outline-variant/20 h-full overflow-y-auto flex flex-col animate-slide-in">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-outline-variant/20 flex items-center justify-between">
+        <div className="sticky top-0 bg-surface-container z-10 px-6 py-5 border-b border-outline-variant/20 flex items-center justify-between">
           <h2 className="text-headline-md font-bold text-on-surface">{title}</h2>
           <button
             onClick={onClose}
@@ -66,7 +67,7 @@ export default function CategoryFormModal({
           </button>
         </div>
         {/* Body */}
-        <form onSubmit={handleSubmit} className="px-6 py-6 flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 px-6 py-6 gap-6">
           {/* Categoría padre (solo para subcategorías) */}
           {(isSubcategory || (!isEditing && parentCategories.length > 0)) && (
             <div className="flex flex-col gap-2">
@@ -97,7 +98,7 @@ export default function CategoryFormModal({
               required
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              placeholder={isSubcategory ? 'Ej: Vinos Tintos de Reserva' : 'Ej: Midnight Cocktails'}
+              placeholder={isSubcategory ? 'Ej: Vinos Tintos de Reserva' : 'Ej: Cocktails'}
               className="bg-surface-container-high border border-outline-variant/30 text-on-surface text-body-md px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/40"
             />
           </div>
@@ -114,33 +115,18 @@ export default function CategoryFormModal({
               className="bg-surface-container-high border border-outline-variant/30 text-on-surface text-body-md px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/40 resize-none"
             />
           </div>
-          {/* Imagen URL */}
+          {/* Imagen */}
           <div className="flex flex-col gap-2">
             <label className="text-label-md font-label-md text-on-surface-variant">
-              URL de Imagen
+              Imagen
             </label>
-            <input
-              type="url"
-              value={imagenUrl}
-              onChange={(e) => setImagenUrl(e.target.value)}
-              placeholder="https://ejemplo.com/imagen.jpg"
-              className="bg-surface-container-high border border-outline-variant/30 text-on-surface text-body-md px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/40"
+            <ImageUploader
+              currentUrl={imagenUrl}
+              onUrlChange={setImagenUrl}
             />
-            {imagenUrl && (
-              <div className="mt-2 w-16 h-16 border border-outline-variant/20 overflow-hidden">
-                <img
-                  src={imagenUrl}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none'
-                  }}
-                />
-              </div>
-            )}
           </div>
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
+          <div className="sticky bottom-0 bg-surface-container flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20">
             <button
               type="button"
               onClick={onClose}

@@ -1,30 +1,36 @@
 import { useState } from 'react'
 import useAuthStore from '@/store/useAuthStore'
-import { useProducts } from '@/features/products/hooks/useProducts'
+import {
+  useProducts,
+  useCreateProduct,
+  useUpdateProduct,
+  useDeleteProduct,
+  useToggleDisponible,
+} from '@/features/products/hooks/useProducts'
 import { useCategories } from '@/features/categorias/hooks/useCategories'
 import { useIngredients } from '@/features/ingredients/hooks/useIngredients'
 import { useUnidadesMedida } from '@/features/unidades-medida/hooks/useUnidadesMedida'
 import type { Product, ProductFormData } from '@/features/products/types'
 import ProductsTable from '@/features/products/components/ProductsTable'
 import ProductFormModal from '@/features/products/components/ProductFormModal'
+import StockEditModal from '@/features/products/components/StockEditModal'
 import DeleteConfirmModal from '@/features/products/components/DeleteConfirmModal'
-
+import { SkeletonTable } from '@/shared/Skeleton'
 export default function ProductosPage() {
   const rol = useAuthStore((s) => s.rol)
   const isAdmin = rol === 'admin'
-  const {
-    data: products, isLoading, isError, error, refetch,
-    create: createMutation,
-    update: updateMutation,
-    delete: deleteMutation,
-    toggleDisponible: toggleMutation,
-    isCreating, isUpdating, isDeleting, isToggling,
-  } = useProducts()
+  const canEditStock = isAdmin || rol === 'stock'
+  const { data: products, isLoading, isError, error, refetch } = useProducts()
   const { data: categories } = useCategories()
   const { data: ingredients } = useIngredients()
   const { data: unidades } = useUnidadesMedida()
+  const createMutation = useCreateProduct()
+  const updateMutation = useUpdateProduct()
+  const deleteMutation = useDeleteProduct()
+  const toggleMutation = useToggleDisponible()
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [stockEditProduct, setStockEditProduct] = useState<Product | null>(null)
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null)
   /* ── Handlers ── */
   const handleCreate = () => {
@@ -32,8 +38,19 @@ export default function ProductosPage() {
     setShowForm(true)
   }
   const handleEdit = (product: Product) => {
-    setEditingProduct(product)
-    setShowForm(true)
+    if (rol === 'stock') {
+      setStockEditProduct(product)
+    } else {
+      setEditingProduct(product)
+      setShowForm(true)
+    }
+  }
+  const handleStockSubmit = (stockCantidad: number) => {
+    if (!stockEditProduct) return
+    updateMutation.mutate(
+      { id: stockEditProduct.id, payload: { stockCantidad } },
+      { onSuccess: () => setStockEditProduct(null) },
+    )
   }
   const handleFormSubmit = (data: ProductFormData) => {
     if (editingProduct) {
@@ -59,11 +76,15 @@ export default function ProductosPage() {
   /* ── Loading ── */
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 gap-4">
-        <span className="material-symbols-outlined animate-spin text-[48px] text-primary">
-          progress_activity
-        </span>
-        <p className="text-body-md text-on-surface-variant">Cargando productos...</p>
+      <div className="flex flex-col gap-6">
+        <div className="flex justify-between items-end">
+          <div>
+            <div className="animate-pulse bg-surface-container-high h-8 w-48 mb-2" />
+            <div className="animate-pulse bg-surface-container-high h-4 w-72" />
+          </div>
+          <div className="animate-pulse bg-surface-container-high h-10 w-36" />
+        </div>
+        <SkeletonTable rows={6} columns={5} />
       </div>
     )
   }
@@ -160,6 +181,7 @@ export default function ProductosPage() {
       <ProductsTable
         data={products ?? []}
         isAdmin={isAdmin}
+        canEditStock={canEditStock}
         unidades={unidades ?? []}
         onEdit={handleEdit}
         onDelete={setDeletingProduct}
@@ -174,7 +196,16 @@ export default function ProductosPage() {
           unidades={unidades ?? []}
           onSubmit={handleFormSubmit}
           onClose={() => setShowForm(false)}
-          isSubmitting={isCreating || isUpdating}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
+        />
+      )}
+      {/* Stock Edit Modal */}
+      {stockEditProduct && (
+        <StockEditModal
+          product={stockEditProduct}
+          onSubmit={handleStockSubmit}
+          onClose={() => setStockEditProduct(null)}
+          isSubmitting={updateMutation.isPending}
         />
       )}
       {/* Delete Modal */}
@@ -183,7 +214,7 @@ export default function ProductosPage() {
           product={deletingProduct}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeletingProduct(null)}
-          isDeleting={isDeleting}
+          isDeleting={deleteMutation.isPending}
         />
       )}
     </>

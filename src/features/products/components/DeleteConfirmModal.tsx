@@ -32,7 +32,7 @@ export default function DeleteConfirmModal({
             <div className="w-14 h-14 bg-error-container/20 border border-error/20 overflow-hidden shrink-0">
               {product.imagenesUrl?.[0] ? (
                 <img
-                  src={product.imagenesUrl?.[0]}
+                  src={product.imagenesUrl[0]}
                   alt={product.nombre}
                   className="w-full h-full object-cover opacity-60"
                 />

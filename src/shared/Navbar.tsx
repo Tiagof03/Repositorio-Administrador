@@ -9,7 +9,7 @@ export default function Navbar() {
           <input
             type="text"
             placeholder="Search orders, ingredients..."
-            className="w-full bg-surface-container-high border-none text-on-surface text-body-md pl-11 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-primary rounded-full"
+            className="w-full bg-surface-container-high border border-outline-variant/30 text-on-surface text-body-md pl-11 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/40"
           />
         </div>
       </div>

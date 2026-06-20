@@ -128,7 +128,7 @@ export default function OrdersTable({
           onClick={() => setStatusFilter('todos')}
           className={`px-4 py-1.5 text-label-md transition-all shrink-0 ${
             statusFilter === 'todos'
-              ? 'bg-primary text-on-primary rounded-lg font-bold'
+              ? 'bg-primary-container text-on-primary-container font-bold'
               : 'bg-surface-container-high text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -143,7 +143,7 @@ export default function OrdersTable({
               onClick={() => setStatusFilter(s)}
               className={`px-4 py-1.5 text-label-md transition-all shrink-0 ${
                 statusFilter === s
-                  ? 'bg-surface-container-high text-on-surface-variant rounded-lg'
+                  ? 'bg-primary-container text-on-primary-container font-bold'
                   : 'bg-surface-container-high text-on-surface-variant hover:text-on-surface'
               }`}
             >
@@ -154,7 +154,7 @@ export default function OrdersTable({
       </div>
 
       {/* Tabla */}
-      <div className="border border-surface-container-high rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+      <div className="border border-outline-variant/20 overflow-hidden">
         <table className="w-full">
           <thead>
             {table.getHeaderGroups().map((hg) => (
@@ -236,14 +236,14 @@ export default function OrdersTable({
             <button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="px-3 py-1.5 rounded-lg border border-outline-variant/20 text-on-surface-variant text-label-md hover:bg-surface-container-high disabled:opacity-30 transition-all"
+              className="px-3 py-1.5 border border-outline-variant text-on-surface-variant text-label-md hover:bg-surface-container-high disabled:opacity-30 transition-all"
             >
               Anterior
             </button>
             <button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="px-3 py-1.5 rounded-lg border border-outline-variant/20 text-on-surface-variant text-label-md hover:bg-surface-container-high disabled:opacity-30 transition-all"
+              className="px-3 py-1.5 border border-outline-variant text-on-surface-variant text-label-md hover:bg-surface-container-high disabled:opacity-30 transition-all"
             >
               Siguiente
             </button>

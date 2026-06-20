@@ -1,9 +1,15 @@
 import { useState } from 'react'
 import useAuthStore from '@/store/useAuthStore'
-import { useIngredients } from '@/features/ingredients/hooks/useIngredients'
+import {
+  useIngredients,
+  useCreateIngredient,
+  useUpdateIngredient,
+  useDeleteIngredient,
+} from '@/features/ingredients/hooks/useIngredients'
 import type { Ingredient, IngredientFormData } from '@/features/ingredients/types'
 import IngredientsTable from '@/features/ingredients/components/IngredientsTable'
 import IngredientFormModal from '@/features/ingredients/components/IngredientFormModal'
+import { SkeletonTable } from '@/shared/Skeleton'
 
 /* ── Delete Confirm Modal (inline) ── */
 function DeleteConfirmModal({
@@ -77,13 +83,11 @@ export default function IngredientesPage() {
   const rol = useAuthStore((s) => s.rol)
   const isAdmin = rol === 'admin'
 
-  const {
-    data: ingredients, isLoading, isError, error, refetch,
-    create: createMutation,
-    update: updateMutation,
-    delete: deleteMutation,
-    isCreating, isUpdating, isDeleting
-  } = useIngredients()
+  const { data: ingredients, isLoading, isError, error, refetch } = useIngredients()
+
+  const createMutation = useCreateIngredient()
+  const updateMutation = useUpdateIngredient()
+  const deleteMutation = useDeleteIngredient()
 
   const [showForm, setShowForm] = useState(false)
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null)
@@ -122,11 +126,15 @@ export default function IngredientesPage() {
   // Loading
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 gap-4">
-        <span className="material-symbols-outlined animate-spin text-[48px] text-primary">
-          progress_activity
-        </span>
-        <p className="text-body-md text-on-surface-variant">Cargando ingredientes...</p>
+      <div className="flex flex-col gap-6">
+        <div className="flex justify-between items-end">
+          <div>
+            <div className="animate-pulse bg-surface-container-high h-8 w-48 mb-2" />
+            <div className="animate-pulse bg-surface-container-high h-4 w-72" />
+          </div>
+          <div className="animate-pulse bg-surface-container-high h-10 w-36" />
+        </div>
+        <SkeletonTable rows={6} columns={5} />
       </div>
     )
   }
@@ -191,7 +199,7 @@ export default function IngredientesPage() {
           ingredient={editingIngredient}
           onSubmit={handleFormSubmit}
           onClose={() => setShowForm(false)}
-          isSubmitting={isCreating || isUpdating}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
         />
       )}
 
@@ -201,7 +209,7 @@ export default function IngredientesPage() {
           ingredient={deletingIngredient}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeletingIngredient(null)}
-          isDeleting={isDeleting}
+          isDeleting={deleteMutation.isPending}
         />
       )}
     </>

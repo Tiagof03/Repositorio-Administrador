@@ -1,12 +1,16 @@
-import { useState, useMemo } from 'react'
-import { useOrders } from '@/features/orders/hooks/useOrders'
+import { useState, useMemo, useEffect } from 'react'
+import { useOrders, useUpdateOrderStatus } from '@/features/orders/hooks/useOrders'
+import { useOrderStatusWS } from '@/features/orders/hooks/useOrderStatusWS'
 import { useClientNames } from '@/features/orders/hooks/useClientNames'
 import { hydrateClientNames } from '@/features/orders/services/admin.service'
 import OrdersKanban from '@/features/orders/components/OrdersKanban'
 import OrderDetailPanel from '@/features/orders/components/OrderDetailPanel'
 import type { Order } from '@/features/orders/types'
+import { SkeletonKanban } from '@/shared/Skeleton'
 export default function PedidosPage() {
-  const { data: orders, isLoading, error, updateStatus } = useOrders()
+  const { data: orders, isLoading, error } = useOrders()
+  const { mutate: updateStatus } = useUpdateOrderStatus()
+  useOrderStatusWS()
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const namesMap = useClientNames(orders)
   const hydratedOrders = useMemo(
@@ -18,14 +22,17 @@ export default function PedidosPage() {
     estadoHacia: string,
     motivo?: string | null,
   ) => {
-    updateStatus.mutate({ id: orderId, estadoHacia, motivo })
+    updateStatus({ id: orderId, estadoHacia, motivo })
   }
+  useEffect(() => {
+    setSelectedOrder((prev) => {
+      if (!prev) return null
+      const updated = hydratedOrders.find((o) => o.id === prev.id)
+      return updated ?? null
+    })
+  }, [hydratedOrders])
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-on-surface-variant">Cargando pedidos...</p>
-      </div>
-    )
+    return <SkeletonKanban />
   }
   if (error) {
     return (
@@ -38,7 +45,7 @@ export default function PedidosPage() {
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-primary text-on-primary text-label-md font-bold hover:brightness-110 transition-all"
+          className="px-4 py-2 bg-primary-container text-on-primary-container text-label-md font-bold hover:brightness-110 transition-all"
         >
           Reintentar
         </button>

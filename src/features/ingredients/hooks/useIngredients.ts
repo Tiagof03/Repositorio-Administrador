@@ -7,37 +7,55 @@ import {
   deleteIngredient,
 } from '@/features/ingredients/services/ingredients.service'
 import type { Ingredient, IngredientFormData } from '@/features/ingredients/types'
-
-export function useIngredients() {
-  const queryClient = useQueryClient()
-  const queryKey = ['ingredients']
-
-  const getAll = useQuery({queryKey, queryFn: getIngredients})
-
-  const getById = (id: number) => useQuery({queryKey: [...queryKey, id], queryFn: () => getIngredientById(id), enabled: id > 0})
-
-  const create = useMutation({
-    mutationFn: (payload: IngredientFormData) => createIngredient(payload),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
+import useToastStore from '@/store/toastStore'
+const toast = useToastStore.getState
+export const useIngredients = () =>
+  useQuery({
+    queryKey: ['ingredients'],
+    queryFn: getIngredients,
   })
-  const update = useMutation({
+export const useIngredient = (id: number) =>
+  useQuery({
+    queryKey: ['ingredients', id],
+    queryFn: () => getIngredientById(id),
+  })
+export const useCreateIngredient = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: IngredientFormData) => createIngredient(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      toast().addToast('success', 'Ingrediente creado correctamente')
+    },
+    onError: () => {
+      toast().addToast('error', 'Error al crear ingrediente')
+    },
+  })
+}
+export const useUpdateIngredient = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: Partial<IngredientFormData> }) =>
       updateIngredient(id, payload),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      toast().addToast('success', 'Ingrediente actualizado correctamente')
+    },
+    onError: () => {
+      toast().addToast('error', 'Error al actualizar ingrediente')
+    },
   })
-  const remove = useMutation({
+}
+export const useDeleteIngredient = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
     mutationFn: (id: number) => deleteIngredient(id),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['ingredients'] })
+      toast().addToast('success', 'Ingrediente eliminado correctamente')
+    },
+    onError: () => {
+      toast().addToast('error', 'Error al eliminar ingrediente')
+    },
   })
-
-  return {
-    ...getAll,
-    getById,
-    create,
-    update,
-    delete: remove,
-    isCreating: create.isPending,
-    isUpdating: update.isPending,
-    isDeleting: remove.isPending
-  }
 }

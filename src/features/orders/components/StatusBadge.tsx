@@ -4,7 +4,6 @@ const statusStyles: Record<OrderStatus, string> = {
   PENDIENTE: 'bg-primary-container/15 text-primary border-primary-container/30',
   CONFIRMADO: 'bg-primary-container/15 text-primary border-primary-container/30',
   EN_PREP: 'bg-tertiary/10 text-tertiary border-tertiary/30',
-  EN_CAMINO: 'bg-secondary/10 text-secondary border-secondary/30',
   ENTREGADO: 'bg-on-surface-variant/10 text-on-surface-variant border-on-surface-variant/20',
   CANCELADO: 'bg-error/10 text-error border-error/30',
 }

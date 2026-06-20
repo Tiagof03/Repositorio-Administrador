@@ -1,12 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-type Role = 'admin' | 'empleado' | 'cajero'
+type Role = 'admin' | 'empleado' | 'cajero' | 'stock'
 
 interface User {
   id: number
   nombre: string
+  apellido: string
   email: string
+  celular: string | null
 }
 
 interface AuthState {

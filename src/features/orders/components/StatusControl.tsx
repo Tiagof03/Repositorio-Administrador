@@ -3,12 +3,11 @@ import useAuthStore from '@/store/useAuthStore'
 import { STATUS_LABELS, STATUS_ICONS } from '@/features/orders/types'
 import type { OrderStatus } from '@/features/orders/types'
 const TRANSITIONS: Record<OrderStatus, { next?: OrderStatus; canCancel: boolean }> = {
-  PENDIENTE: { next: 'CONFIRMADO', canCancel: true },
-  CONFIRMADO: { next: 'EN_PREP', canCancel: true },
-  EN_PREP: { next: 'EN_CAMINO', canCancel: false },
-  EN_CAMINO: { next: 'ENTREGADO', canCancel: false },
-  ENTREGADO: { canCancel: false },
-  CANCELADO: { canCancel: false },
+  PENDIENTE:  { next: 'CONFIRMADO',                canCancel: true },
+  CONFIRMADO: { next: 'EN_PREP',                   canCancel: true },
+  EN_PREP:    { next: 'ENTREGADO',                 canCancel: true },
+  ENTREGADO:  {                                      canCancel: false },
+  CANCELADO:  {                                      canCancel: false },
 }
 interface StatusControlProps {
   orderId: number
@@ -21,7 +20,7 @@ export default function StatusControl({
   onStatusChange,
 }: StatusControlProps) {
   const rol = useAuthStore((s) => s.rol)
-  const canChange = rol === 'admin' || rol === 'cajero'
+  const canChange = rol === 'admin' || rol === 'cajero' || rol === 'empleado'
   const [showMotivo, setShowMotivo] = useState(false)
   const [motivo, setMotivo] = useState('')
   if (!canChange) return null
@@ -44,7 +43,7 @@ export default function StatusControl({
   }
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         {transition.next && (
           <button
             onClick={handleForward}

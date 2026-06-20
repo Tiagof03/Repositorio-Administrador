@@ -14,13 +14,14 @@ import type { UnidadMedida } from '@/features/unidades-medida/types'
 interface Props {
   data: Product[]
   isAdmin: boolean
+  canEditStock: boolean
   unidades: UnidadMedida[]
   onEdit: (product: Product) => void
   onDelete: (product: Product) => void
   onToggle: (product: Product) => void
 }
 const columnHelper = createColumnHelper<Product>()
-export default function ProductsTable({ data, isAdmin, unidades, onEdit, onDelete, onToggle }: Props) {
+export default function ProductsTable({ data, isAdmin, canEditStock, unidades, onEdit, onDelete, onToggle }: Props) {
   const [globalFilter, setGlobalFilter] = useState('')
   const [sorting, setSorting] = useState<SortingState>([])
   const unidadMap = useMemo(
@@ -93,10 +94,10 @@ export default function ProductsTable({ data, isAdmin, unidades, onEdit, onDelet
         const disponible = info.getValue()
         return (
           <button
-            onClick={() => isAdmin && onToggle(info.row.original)}
-            disabled={!isAdmin}
+            onClick={() => canEditStock && onToggle(info.row.original)}
+            disabled={!canEditStock}
             className={`inline-flex items-center gap-1.5 px-3 py-1 text-label-sm font-label-sm uppercase tracking-wider transition-colors ${
-              isAdmin ? 'cursor-pointer hover:brightness-110' : 'cursor-default'
+              canEditStock ? 'cursor-pointer hover:brightness-110' : 'cursor-default'
             } ${
               disponible
                 ? 'bg-tertiary-container/15 text-tertiary border border-tertiary/30'
@@ -114,7 +115,7 @@ export default function ProductsTable({ data, isAdmin, unidades, onEdit, onDelet
       },
       size: 170,
     }),
-    ...(isAdmin
+    ...(isAdmin || canEditStock
       ? [
           columnHelper.display({
             id: 'acciones',
@@ -128,13 +129,15 @@ export default function ProductsTable({ data, isAdmin, unidades, onEdit, onDelet
                 >
                   <span className="material-symbols-outlined text-[20px]">edit</span>
                 </button>
-                <button
-                  onClick={() => onDelete(info.row.original)}
-                  className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
-                  title="Eliminar"
-                >
-                  <span className="material-symbols-outlined text-[20px]">delete</span>
-                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => onDelete(info.row.original)}
+                    className="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+                    title="Eliminar"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">delete</span>
+                  </button>
+                )}
               </div>
             ),
             size: 120,

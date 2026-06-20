@@ -7,37 +7,55 @@ import {
   updateCategory,
   deleteCategory,
 } from '@/features/categorias/services/categories.service'
-
-export function useCategories() {
-  const queryClient = useQueryClient()
-  const queryKey = ['categories']
-
-  const getAll = useQuery({queryKey, queryFn: getCategories})
-
-  const getById = (id: number) => useQuery({queryKey: [...queryKey, id], queryFn: () => getCategoryById(id), enabled: id > 0})
-
-  const create = useMutation({
-    mutationFn: (payload: CategoryFormData) => createCategory(payload),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
+import useToastStore from '@/store/toastStore'
+const toast = useToastStore.getState
+export const useCategories = () =>
+  useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories,
   })
-  const update = useMutation({
+export const useCategory = (id: number) =>
+  useQuery({
+    queryKey: ['categories', id],
+    queryFn: () => getCategoryById(id),
+  })
+export const useCreateCategory = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CategoryFormData) => createCategory(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['categories'] })
+      toast().addToast('success', 'Categoría creada correctamente')
+    },
+    onError: () => {
+      toast().addToast('error', 'Error al crear categoría')
+    },
+  })
+}
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: Partial<CategoryFormData> }) =>
       updateCategory(id, payload),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['categories'] })
+      toast().addToast('success', 'Categoría actualizada correctamente')
+    },
+    onError: () => {
+      toast().addToast('error', 'Error al actualizar categoría')
+    },
   })
-  const remove = useMutation({
+}
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
     mutationFn: (id: number) => deleteCategory(id),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey })
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['categories'] })
+      toast().addToast('success', 'Categoría eliminada correctamente')
+    },
+    onError: () => {
+      toast().addToast('error', 'Error al eliminar categoría')
+    },
   })
-
-  return {
-    ...getAll,
-    getById,
-    create,
-    update,
-    delete: remove,
-    isCreating: create.isPending,
-    isUpdating: update.isPending,
-    isDeleting: remove.isPending
-  }
 }

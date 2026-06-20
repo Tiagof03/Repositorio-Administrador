@@ -1,22 +1,26 @@
 import { useState } from 'react'
 import useAuthStore from '@/store/useAuthStore'
-import { useCategories } from '@/features/categorias/hooks/useCategories'
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from '@/features/categorias/hooks/useCategories'
 import type { Category, CategoryFormData } from '@/features/categorias/types'
 import CategoriesTable from '@/features/categorias/components/CategoriesTable'
 import CategoryFormModal from '@/features/categorias/components/CategoryFormModal'
 import DeleteConfirmModal from '@/features/categorias/components/DeleteConfirmModal'
+import { SkeletonTable } from '@/shared/Skeleton'
 
 export default function CategoriasPage() {
   const rol = useAuthStore((s) => s.rol)
   const isAdmin = rol === 'admin'
 
-  const { 
-    data: categories, isLoading, isError, error, refetch,
-    create: createMutation,
-    update: updateMutation,
-    delete: deleteMutation,
-    isCreating, isUpdating, isDeleting
-  } = useCategories()
+  const { data: categories, isLoading, isError, error, refetch } = useCategories()
+
+  const createMutation = useCreateCategory()
+  const updateMutation = useUpdateCategory()
+  const deleteMutation = useDeleteCategory()
 
   const [showForm, setShowForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
@@ -64,11 +68,15 @@ export default function CategoriasPage() {
   // Loading
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 gap-4">
-        <span className="material-symbols-outlined animate-spin text-[48px] text-primary">
-          progress_activity
-        </span>
-        <p className="text-body-md text-on-surface-variant">Cargando categorías...</p>
+      <div className="flex flex-col gap-6">
+        <div className="flex justify-between items-end">
+          <div>
+            <div className="animate-pulse bg-surface-container-high h-8 w-48 mb-2" />
+            <div className="animate-pulse bg-surface-container-high h-4 w-72" />
+          </div>
+          <div className="animate-pulse bg-surface-container-high h-10 w-36" />
+        </div>
+        <SkeletonTable rows={6} columns={4} />
       </div>
     )
   }
@@ -136,7 +144,7 @@ export default function CategoriasPage() {
           defaultParentId={defaultParentId}
           onSubmit={handleFormSubmit}
           onClose={() => setShowForm(false)}
-          isSubmitting={isCreating || isUpdating}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
         />
       )}
 
@@ -146,7 +154,7 @@ export default function CategoriasPage() {
           category={deletingCategory}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeletingCategory(null)}
-          isDeleting={isDeleting}
+          isDeleting={deleteMutation.isPending}
         />
       )}
     </>

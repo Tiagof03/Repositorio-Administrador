@@ -61,7 +61,7 @@ export default function IngredientsTable({ data, isAdmin, onEdit, onDelete }: Pr
             Sí
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 bg-surface-container-high text-on-surface-variant px-3 py-1 text-label-sm font-label-sm uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1.5 bg-tertiary-container/15 text-tertiary border border-tertiary/30 px-3 py-1 text-label-sm font-label-sm uppercase tracking-wider">
             No
           </span>
         )

@@ -9,7 +9,7 @@ const userCache = new Map<number, string>()
 export async function getNombreCliente(userId: number): Promise<string> {
   if (userCache.has(userId)) return userCache.get(userId)!
   try {
-    const { data } = await api.get<AdminUser>(`/admin/usuarios/${userId}`)
+    const { data } = await api.get<AdminUser>(`/usuarios/${userId}`)
     const nombre = `${data.nombre} ${data.apellido}`.trim()
     userCache.set(userId, nombre)
     return nombre

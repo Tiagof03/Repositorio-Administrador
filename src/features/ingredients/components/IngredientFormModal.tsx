@@ -28,17 +28,17 @@ export default function IngredientFormModal({
   const isEditing = ingredient !== null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex justify-end">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/60"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative bg-surface-container border border-outline-variant/20 w-full max-w-md mx-4 flex flex-col">
+      {/* Panel */}
+      <div className="relative w-full max-w-md bg-surface-container border-l border-outline-variant/20 h-full overflow-y-auto flex flex-col animate-slide-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/20">
+        <div className="sticky top-0 bg-surface-container z-10 flex items-center justify-between px-6 py-5 border-b border-outline-variant/20">
           <h2 className="text-headline-md font-bold text-on-surface">
             {isEditing ? 'Editar Ingrediente' : 'Nuevo Ingrediente'}
           </h2>
@@ -57,7 +57,7 @@ export default function IngredientFormModal({
             e.stopPropagation()
             void form.handleSubmit()
           }}
-          className="flex flex-col"
+          className="flex flex-col flex-1"
         >
           <div className="px-6 py-6 flex flex-col gap-5">
             {/* Campo: Nombre */}
@@ -158,7 +158,7 @@ export default function IngredientFormModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-outline-variant/20">
+          <div className="sticky bottom-0 bg-surface-container flex items-center justify-end gap-3 px-6 py-4 border-t border-outline-variant/20">
             <button
               type="button"
               onClick={onClose}

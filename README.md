@@ -2,47 +2,35 @@
 
 Panel de administración de un sistema de pedidos de comida. Permite gestionar productos, ingredientes, categorías y pedidos con control de acceso por roles.
 
-## Stack
-
-- **Vite 8** + **React 19** + **TypeScript 6**
-- **React Router DOM v7** — enrutamiento del cliente
-- **TanStack Query v5** — fetching y caché de datos
-- **TanStack Table v8** — tablas con paginación y filtros
-- **TanStack Form v1** — formularios tipados
-- **Axios v1** — cliente HTTP
-- **Zustand v5** — estado global
-- **Tailwind CSS v4** — estilos utilitarios
-
 ## Instalación
+## 1. Clonas el repo.
 
-```bash
-npm install
-```
+git clone https://github.com/Tiagof03/Repositorio-Administrador.git
 
-Copiar las variables de entorno:
+## 2. Entras a la carpeta.
 
-```bash
+cd Repositorio-Administrador
+
+## 3. Instalas las dependencias.
+
+pnpm install
+
+## 4. Copias las variables de entorno.
+
 cp .env.example .env
-```
 
-Editar `.env` con la URL de la API:
+## 5. Editar `.env` con la URL de la API:
 
-```
-VITE_API_URL=http://localhost:3000/api
-```
+VITE_API_URL=http://localhost:8000/api/v1
 
-## Levantar el proyecto
+## 6. Levantar el proyecto
 
-```bash
-# desarrollo
-npm run dev
+pnpm run dev
 
-# build de producción
-npm run build
+## 7. Login con Admin
 
-# preview del build
-npm run preview
-```
+admin@foodstore.com
+Admin1234!
 
 ## Estructura de carpetas
 
@@ -75,7 +63,7 @@ feature/
 
 | Variable        | Descripción              | Ejemplo                       |
 | --------------- | ------------------------ | ----------------------------- |
-| `VITE_API_URL`  | URL base de la API REST  | `http://localhost:3000/api`   |
+| `VITE_API_URL`  | URL base de la API REST  | `http://localhost:8000/api/v1`   |
 
 ## Roles del sistema
 
@@ -85,15 +73,16 @@ feature/
 | `empleado` | Solo lectura                                  |
 | `cajero`   | Gestión de estados de pedidos                 |
 
-## PRUEBAS DE LOGIN 
+## Stack
 
-localStorage.setItem('auth-storage', JSON.stringify({
-    state: {
-      user: { id: 1, nombre: "Admin", email: "admin@test.com" },
-      token: "test-token",
-      rol: "admin"
-    },
-    version: 0
-  }))
+- **Vite 8** + **React 19** + **TypeScript 6**
+- **React Router DOM v7** — enrutamiento del cliente
+- **TanStack Query v5** — fetching y caché de datos
+- **TanStack Table v8** — tablas con paginación y filtros
+- **TanStack Form v1** — formularios tipados
+- **Axios v1** — cliente HTTP
+- **Zustand v5** — estado global
+- **Tailwind CSS v4** — estilos utilitarios
+
 
 

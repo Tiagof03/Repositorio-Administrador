@@ -56,14 +56,6 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm flex flex-col gap-stack-lg">
         {/* Header */}
         <div className="flex flex-col items-center gap-stack-sm">
-          <div className="w-14 h-14 bg-primary-container flex items-center justify-center mb-2">
-            <span
-              className="material-symbols-outlined text-on-primary-container text-[32px]"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              restaurant
-            </span>
-          </div>
           <h1 className="text-headline-lg font-bold text-primary uppercase tracking-tighter">
             Food Store
           </h1>

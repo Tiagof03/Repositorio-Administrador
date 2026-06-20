@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
+import { getProductById } from '@/features/products/types'
 import type { Product, ProductFormData } from '@/features/products/types'
 import type { Category } from '@/features/categorias/types'
 import type { Ingredient } from '@/features/ingredients/types'
 import type { UnidadMedida } from '@/features/unidades-medida/types'
+import ImageUploader from '@/features/products/components/ImageUploader'
 interface Props {
   product: Product | null
   categories: Category[]
@@ -35,10 +37,11 @@ export default function ProductFormModal({
   const [imageUrl, setImageUrl] = useState(product?.imagenesUrl?.[0] ?? '')
   const [disponible, setDisponible] = useState(product?.disponible ?? true)
   const [selectedCatIds, setSelectedCatIds] = useState<number[]>([])
-  const [selectedIngIds, setSelectedIngIds] = useState<number[]>([])
+  const [ingredientMap, setIngredientMap] = useState<Record<number, { esRemovible: boolean }>>({})
   const [unidadVentaId, setUnidadVentaId] = useState<number | null>(
     product?.unidadVentaId ?? null,
   )
+
   const unidadesByTipo = useMemo(() => {
     const map: Record<string, UnidadMedida[]> = {}
     for (const u of unidades) {
@@ -47,6 +50,7 @@ export default function ProductFormModal({
     }
     return map
   }, [unidades])
+
   useEffect(() => {
     if (product) {
       setNombre(product.nombre)
@@ -56,18 +60,54 @@ export default function ProductFormModal({
       setImageUrl(product.imagenesUrl?.[0] ?? '')
       setDisponible(product.disponible)
       setUnidadVentaId(product.unidadVentaId)
+
+      getProductById(product.id).then((detail) => {
+        setSelectedCatIds(detail.categorias.map((c) => c.id))
+        const map: Record<number, { esRemovible: boolean }> = {}
+        for (const ing of detail.ingredientes) {
+          map[ing.id] = { esRemovible: ing.esRemovible }
+        }
+        setIngredientMap(map)
+      }).catch(() => {})
+    } else {
+      setSelectedCatIds([])
+      setIngredientMap({})
     }
   }, [product])
+
   const toggleCat = (id: number) => {
     setSelectedCatIds((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
     )
   }
   const toggleIng = (id: number) => {
-    setSelectedIngIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    )
+    setIngredientMap((prev) => {
+      if (id in prev) {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      }
+      return { ...prev, [id]: { esRemovible: true } }
+    })
   }
+  const toggleRemovible = (id: number) => {
+    setIngredientMap((prev) => {
+      if (!(id in prev)) return prev
+      return { ...prev, [id]: { esRemovible: !prev[id].esRemovible } }
+    })
+  }
+  const flatCats = useMemo(() => {
+    const result: { cat: Category; depth: number }[] = []
+    function walk(list: Category[], d: number) {
+      for (const c of list) {
+        result.push({ cat: c, depth: d })
+        if (c.hijos && c.hijos.length > 0) walk(c.hijos, d + 1)
+      }
+    }
+    walk(categories, 0)
+    return result
+  }, [categories])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!nombre.trim() || precioBase <= 0) return
@@ -83,22 +123,22 @@ export default function ProductFormModal({
         categoriaId: id,
         esPrincipal: i === 0,
       })),
-      ingredientes: selectedIngIds.map((id) => ({
-        ingredienteId: id,
+      ingredientes: Object.entries(ingredientMap).map(([id, config]) => ({
+        ingredienteId: Number(id),
         cantidad: 1,
         unidadMedidaId: 1,
-        esRemovible: false,
+        esRemovible: config.esRemovible,
       })),
     })
   }
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto py-8">
+    <div className="fixed inset-0 z-50 flex justify-end">
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/60" onClick={onClose} />
-      {/* Modal */}
-      <div className="relative bg-surface-container border border-outline-variant/20 w-full max-w-3xl mx-4 flex flex-col">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      {/* Panel */}
+      <div className="relative w-full max-w-3xl bg-surface-container border-l border-outline-variant/20 h-full overflow-y-auto flex flex-col animate-slide-in">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-outline-variant/20 flex items-center justify-between shrink-0">
+        <div className="sticky top-0 bg-surface-container z-10 px-6 py-5 border-b border-outline-variant/20 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-headline-md font-bold text-on-surface">
               {isEditing ? 'Editar Producto' : 'Nuevo Producto'}
@@ -117,7 +157,7 @@ export default function ProductFormModal({
           </button>
         </div>
         {/* Body */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(100vh-12rem)]">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1">
           <div className="grid grid-cols-12 gap-gutter p-6">
             {/* ── Columna izquierda: datos principales ── */}
             <div className="col-span-12 md:col-span-8 flex flex-col gap-6">
@@ -136,7 +176,7 @@ export default function ProductFormModal({
                     required
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
-                    placeholder="Ej: Midnight Ramen"
+                    placeholder="Ej: Ramen"
                     className="bg-background border-b border-outline-variant focus:border-primary focus:ring-0 text-body-md py-2 transition-colors placeholder:text-on-surface-variant/40"
                   />
                 </div>
@@ -158,31 +198,36 @@ export default function ProductFormModal({
                   <label className="text-label-sm font-label-sm text-on-surface-variant">
                     Categorías
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((cat) => {
-                      const selected = selectedCatIds.includes(cat.id)
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => toggleCat(cat.id)}
-                          className={`px-4 py-2 text-label-sm font-label-sm border transition-all cursor-pointer flex items-center gap-2 ${
-                            selected
-                              ? 'bg-primary-container/20 border-primary text-primary'
-                              : 'bg-surface-container-high border-outline-variant/30 text-on-surface-variant hover:border-outline hover:text-on-surface'
-                          }`}
-                        >
-                          {cat.nombre}
-                          {selected && (
-                            <span className="material-symbols-outlined text-[16px]">check</span>
-                          )}
-                        </button>
-                      )
-                    })}
-                    {categories.length === 0 && (
-                      <p className="text-label-sm text-on-surface-variant/50">
+                  <div className="flex flex-col gap-1">
+                    {flatCats.length === 0 ? (
+                      <p className="text-label-sm text-on-surface-variant/50 py-2">
                         No hay categorías disponibles
                       </p>
+                    ) : (
+                      flatCats.map(({ cat, depth }) => {
+                        const selected = selectedCatIds.includes(cat.id)
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => toggleCat(cat.id)}
+                            style={{ paddingLeft: `${12 + depth * 20}px` }}
+                            className={`flex items-center gap-2 py-2 pr-3 text-label-sm font-label-sm border-l-2 transition-all cursor-pointer text-left ${
+                              selected
+                                ? 'bg-primary-container/10 border-primary text-primary'
+                                : 'border-transparent text-on-surface-variant hover:text-on-surface hover:border-outline-variant'
+                            }`}
+                          >
+                            {depth > 0 && (
+                              <span className="material-symbols-outlined text-[12px] text-on-surface-variant/40">subdirectory_arrow_right</span>
+                            )}
+                            <span className="flex-1 truncate">{cat.nombre}</span>
+                            {selected && (
+                              <span className="material-symbols-outlined text-[16px]">check</span>
+                            )}
+                          </button>
+                        )
+                      })
                     )}
                   </div>
                 </div>
@@ -262,43 +307,60 @@ export default function ProductFormModal({
                 </p>
                 <div className="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-2">
                   {ingredients.map((ing) => {
-                    const selected = selectedIngIds.includes(ing.id)
+                    const selected = ing.id in ingredientMap
                     return (
-                      <button
+                      <div
                         key={ing.id}
-                        type="button"
-                        onClick={() => toggleIng(ing.id)}
-                        className={`flex items-center gap-3 px-4 py-2.5 text-left border transition-all cursor-pointer ${
+                        className={`flex flex-col px-4 py-2.5 border transition-all ${
                           selected
-                            ? 'bg-primary-container/10 border-primary/40 text-on-surface'
-                            : 'bg-surface-container-high/50 border-outline-variant/20 text-on-surface-variant hover:border-outline'
+                            ? 'bg-primary-container/10 border-primary/40'
+                            : 'bg-surface-container-high/50 border-outline-variant/20'
                         }`}
                       >
-                        <span
-                          className={`w-5 h-5 flex items-center justify-center border ${
-                            selected
-                              ? 'bg-primary-container border-primary'
-                              : 'border-outline-variant/40'
-                          }`}
+                        <button
+                          type="button"
+                          onClick={() => toggleIng(ing.id)}
+                          className="flex items-center gap-3 text-left cursor-pointer"
                         >
-                          {selected && (
-                            <span className="material-symbols-outlined text-on-primary-container text-[14px]">
-                              check
+                          <span
+                            className={`w-5 h-5 flex items-center justify-center border ${
+                              selected
+                                ? 'bg-primary-container border-primary'
+                                : 'border-outline-variant/40'
+                            }`}
+                          >
+                            {selected && (
+                              <span className="material-symbols-outlined text-on-primary-container text-[14px]">
+                                check
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-label-sm font-label-sm flex-1 truncate">
+                            {ing.nombre}
+                          </span>
+                          {ing.es_alergeno && (
+                            <span
+                              className="material-symbols-outlined text-error text-[16px]"
+                              title="Alérgeno"
+                            >
+                              warning
                             </span>
                           )}
-                        </span>
-                        <span className="text-label-sm font-label-sm flex-1 truncate">
-                          {ing.nombre}
-                        </span>
-                        {ing.es_alergeno && (
-                          <span
-                            className="material-symbols-outlined text-error text-[16px]"
-                            title="Alérgeno"
-                          >
-                            warning
-                          </span>
+                        </button>
+                        {selected && (
+                          <label className="flex items-center gap-2 mt-1.5 ml-8 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={ingredientMap[ing.id].esRemovible}
+                              onChange={() => toggleRemovible(ing.id)}
+                              className="accent-primary w-3.5 h-3.5"
+                            />
+                            <span className="text-label-xs text-on-surface-variant">
+                              Removible por el cliente
+                            </span>
+                          </label>
                         )}
-                      </button>
+                      </div>
                     )
                   })}
                   {ingredients.length === 0 && (
@@ -307,9 +369,9 @@ export default function ProductFormModal({
                     </p>
                   )}
                 </div>
-                {selectedIngIds.length > 0 && (
+                {Object.keys(ingredientMap).length > 0 && (
                   <p className="text-label-sm text-on-surface-variant/60">
-                    {selectedIngIds.length} ingrediente(s) seleccionado(s)
+                    {Object.keys(ingredientMap).length} ingrediente(s) seleccionado(s)
                   </p>
                 )}
               </section>
@@ -321,37 +383,10 @@ export default function ProductFormModal({
                 <h3 className="text-label-md font-label-md text-primary uppercase tracking-widest">
                   Imagen del Producto
                 </h3>
-                <div className="aspect-square bg-surface-variant/40 border border-outline-variant/20 overflow-hidden">
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        ;(e.target as HTMLImageElement).style.display = 'none'
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-[48px] text-on-surface-variant/30">
-                        add_photo_alternate
-                      </span>
-                      <p className="text-label-sm text-on-surface-variant/40">Sin imagen</p>
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-label-sm font-label-sm text-on-surface-variant">
-                    URL de la imagen
-                  </label>
-                  <input
-                    type="url"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="bg-background border-b border-outline-variant focus:border-primary focus:ring-0 text-body-md py-2 transition-colors placeholder:text-on-surface-variant/40 text-sm"
-                  />
-                </div>
+                <ImageUploader
+                  currentUrl={imageUrl}
+                  onUrlChange={setImageUrl}
+                />
               </section>
               {/* Estado */}
               <section className="bg-surface-container-low p-6 border border-outline-variant/20 flex flex-col gap-4">
@@ -378,7 +413,7 @@ export default function ProductFormModal({
                   <span
                     className={`w-3 h-3 rounded-full ${
                       disponible
-                        ? 'bg-tertiary animate-pulse shadow-[0_0_8px_rgba(96,218,196,0.6)]'
+                        ? 'bg-tertiary animate-pulse shadow-[0_0_8px_rgba(40,89,37,0.6)]'
                         : 'bg-on-surface-variant/40'
                     }`}
                   />
@@ -390,7 +425,7 @@ export default function ProductFormModal({
             </div>
           </div>
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-outline-variant/20 shrink-0">
+          <div className="sticky bottom-0 bg-surface-container flex items-center justify-end gap-3 px-6 py-4 border-t border-outline-variant/20 shrink-0">
             <button
               type="button"
               onClick={onClose}

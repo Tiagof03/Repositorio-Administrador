@@ -1,8 +1,20 @@
+export interface Direccion {
+  id: number
+  alias: string
+  linea1: string
+  linea2: string
+  ciudad: string
+  provincia: string
+  codigoPostal: string
+  latitud: number
+  longitud: number
+  esPrincipal: boolean
+}
+
 export const ORDER_STATUSES = [
   'PENDIENTE',
   'CONFIRMADO',
   'EN_PREP',
-  'EN_CAMINO',
   'ENTREGADO',
   'CANCELADO',
 ] as const
@@ -11,14 +23,12 @@ export const STATUS_FLOW: OrderStatus[] = [
   'PENDIENTE',
   'CONFIRMADO',
   'EN_PREP',
-  'EN_CAMINO',
   'ENTREGADO',
 ]
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   PENDIENTE: 'Pendiente',
   CONFIRMADO: 'Confirmado',
   EN_PREP: 'En Preparación',
-  EN_CAMINO: 'En Camino',
   ENTREGADO: 'Entregado',
   CANCELADO: 'Cancelado',
 }
@@ -26,13 +36,11 @@ export const STATUS_ICONS: Record<OrderStatus, string> = {
   PENDIENTE: 'schedule',
   CONFIRMADO: 'contract_edit',
   EN_PREP: 'outdoor_grill',
-  EN_CAMINO: 'local_shipping',
   ENTREGADO: 'check_circle',
   CANCELADO: 'cancel',
 }
 export const FORMA_PAGO_LABELS: Record<string, string> = {
   EFECTIVO: 'Efectivo',
-  TARJETA: 'Tarjeta',
   MERCADOPAGO: 'Mercado Pago',
   TRANSFERENCIA: 'Transferencia',
 }
@@ -43,6 +51,7 @@ export interface OrderItem {
   precioSnapshot: number
   subtotalSnap: number
   personalizacion: number[] | null
+  personalizacionNombres: string[] | null
 }
 export interface HistorialEntry {
   estadoDesde: string | null
@@ -72,6 +81,7 @@ export function toCamelCaseOrder(data: any): Order {
     id: data.id,
     usuarioId: data.usuario_id,
     clienteNombre: '',
+    nombrePara: data.nombre_para ?? null, 
     direccionId: data.direccion_id,
     estadoCodigo: data.estado_codigo,
     formaPagoCodigo: data.forma_pago_codigo,
@@ -88,6 +98,7 @@ export function toCamelCaseOrder(data: any): Order {
       precioSnapshot: d.precio_snapshot,
       subtotalSnap: d.subtotal_snap,
       personalizacion: d.personalizacion,
+      personalizacionNombres: d.personalizacion_nombres ?? null,
     })),
     historial: (data.historial ?? []).map((h: any) => ({
       estadoDesde: h.estado_desde,

@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import useAuthStore from '@/store/useAuthStore'
 
-const VALID_ROLES = ['admin', 'empleado', 'cajero'] as const
+const VALID_ROLES = ['admin', 'empleado', 'cajero', 'stock'] as const
 
 export default function ProtectedRoute() {
   const token = useAuthStore((s) => s.token)
