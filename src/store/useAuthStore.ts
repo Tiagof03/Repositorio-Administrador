@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-type Role = 'admin' | 'empleado' | 'cajero' | 'stock'
+import type { Role } from '@/features/auth/types'
 
 interface User {
   id: number

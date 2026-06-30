@@ -2,12 +2,12 @@ export interface LoginRequest {
   email: string
   password: string
 }
-// Lo que devuelve POST /auth/token
+
 export interface TokenResponse {
   access_token: string
   token_type: string
 }
-// Lo que devuelve GET /auth/me
+
 export interface MeResponse {
   id: number
   email: string
@@ -24,7 +24,8 @@ export interface RegisterRequest {
   password: string
 }
 
-export type Role = 'admin' | 'empleado' | 'cajero' | 'stock'
+export type Role = 'admin' | 'pedidos' | 'cajero' | 'stock' | 'cliente'
+
 export interface LoginResponse {
   user: {
     id: number

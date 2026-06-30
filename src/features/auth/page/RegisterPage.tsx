@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { register } from '@/features/auth/services/auth.service'
 import useAuthStore from '@/store/useAuthStore'
+
 export default function RegisterPage() {
   const navigate = useNavigate()
   const loginStore = useAuthStore((s) => s.login)
@@ -14,9 +15,19 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      const rol = useAuthStore.getState().rol
+      if (rol === 'cliente') {
+        window.location.href = 'http://localhost:5174'
+        return
+      }
+      navigate(rol === 'cajero' ? '/pedidos' : '/productos', { replace: true })
+    }
+  }, [user, navigate])
+
   if (user) {
-    const rol = useAuthStore.getState().rol
-    navigate(rol === 'cajero' ? '/pedidos' : '/productos', { replace: true })
     return null
   }
   const handleSubmit = async (e: React.FormEvent) => {

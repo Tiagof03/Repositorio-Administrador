@@ -22,7 +22,7 @@ export default function Sidebar() {
   const rol = useAuthStore((s) => s.rol)
   const isAdmin = rol === 'admin'
   const isStock = rol === 'stock'
-  const isPedidos = rol === 'empleado'
+  const isPedidos = rol === 'pedidos'
   const isCajero = rol === 'cajero'
 
   const visibleItems = navItems.filter((item) => {

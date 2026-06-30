@@ -1,6 +1,4 @@
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie,
-} from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts'
 import type { DashboardResponse } from '@/features/dashboard/types'
 
 const ESTADO_COLORS: Record<string, string> = {

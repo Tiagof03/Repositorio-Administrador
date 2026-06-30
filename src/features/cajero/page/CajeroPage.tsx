@@ -1,10 +1,5 @@
 import { useState } from 'react'
-import {
-  useCajeroProducts,
-  useFormasPago,
-  useCreatePedido,
-  useCart,
-} from '@/features/cajero/hooks/useCajero'
+import { useCajeroProducts, useFormasPago, useCreatePedido, useCart } from '@/features/cajero/hooks/useCajero'
 import useToastStore from '@/store/toastStore'
 import ProductGrid from '@/features/cajero/components/ProductGrid'
 import ProductCustomizerModal from '@/features/cajero/components/ProductCustomizerModal'
@@ -47,8 +42,8 @@ export default function CajeroPage() {
       setSelectedPago('')
       setClienteNombre('')
     } catch (error) {
-      const raw = (error as any)?.response?.data?.detail
-      const msg = typeof raw === 'string' ? raw : raw?.detail ?? 'Error al crear pedido'
+      const err = error as { response?: { data?: { detail?: string } } }
+      const msg = err?.response?.data?.detail ?? 'Error al crear pedido'
       useToastStore.getState().addToast('error', msg)
     }
   }

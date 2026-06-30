@@ -13,6 +13,7 @@ import CategoriasPage from '@/features/categorias/page/CategoriasPage'
 import PedidosPage from '@/features/orders/page/PedidosPage'
 import RegisterPage from '@/features/auth/page/RegisterPage'
 import AdminUsersPage from '@/features/admin-users/page/AdminUsersPage'
+
 const router = createBrowserRouter([
   {
     path: '/login',
@@ -55,7 +56,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'pedidos',
-            element: <RoleGuard allowedRoles={['admin', 'empleado']}><PedidosPage /></RoleGuard>,
+            element: <RoleGuard allowedRoles={['admin', 'pedidos']}><PedidosPage /></RoleGuard>,
           },
           {
             path: 'cajero',

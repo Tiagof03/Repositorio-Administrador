@@ -1,16 +1,15 @@
 import api from '@/lib/axios'
 import type { LoginRequest, LoginResponse, MeResponse, RegisterRequest, Role } from '@/features/auth/types'
-// Mapea la lista de roles del backend al rol único que usa el frontend.
-// Prioridad: admin > cajero > empleado
+
 function mapRoles(roles: string[]): Role {
   const normalized = roles.map((r) => r.toLowerCase())
   if (normalized.includes('admin')) return 'admin'
   if (normalized.includes('cajero')) return 'cajero'
-  if (normalized.includes('pedidos')) return 'empleado'
+  if (normalized.includes('pedidos')) return 'pedidos'
   if (normalized.includes('stock')) return 'stock'
-  if (normalized.includes('empleado')) return 'empleado'
-  // fallback por si el rol no coincide con ninguno esperado
-  return 'empleado'
+  if (normalized.includes('cliente')) return 'cliente'
+
+  return 'cliente'
 }
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   const { data: tokenData } = await api.post('/auth/login', credentials)

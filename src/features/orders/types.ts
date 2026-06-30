@@ -64,6 +64,7 @@ export interface Order {
   id: number
   usuarioId: number
   clienteNombre: string
+  nombrePara: string | null
   direccionId: number | null
   estadoCodigo: OrderStatus
   formaPagoCodigo: string

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { getProductById } from '@/features/products/types'
+import { getProductById } from '@/features/products/services/products.service'
 import type { Product, ProductFormData } from '@/features/products/types'
 import type { Category } from '@/features/categorias/types'
 import type { Ingredient } from '@/features/ingredients/types'
@@ -113,7 +113,7 @@ export default function ProductFormModal({
     if (!nombre.trim() || precioBase <= 0) return
     onSubmit({
       nombre: nombre.trim(),
-      descripcion: descripcion.trim() || undefined,
+      descripcion: descripcion.trim() || null,
       precioBase,
       imagenesUrl: imageUrl.trim() ? [imageUrl.trim()] : [],
       stockCantidad,

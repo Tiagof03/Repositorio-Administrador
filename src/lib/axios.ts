@@ -1,4 +1,5 @@
 import axios from 'axios'
+import router from '@/router'
 
 
 const api = axios.create({
@@ -39,7 +40,7 @@ api.interceptors.response.use(
       !error.config?.url?.startsWith('/auth/')
     ) {
       clearAuth()
-      window.location.href = '/login'
+      router.navigate('/login', {replace: true})
     }
     return Promise.reject(error)
   },
